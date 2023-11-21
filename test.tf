@@ -1,11 +1,19 @@
-resource "aws_lb_target_group_attachment" "tg_attachment_1" {
-  target_group_arn = module.aws_lb_target_group_1.target_group_arn
-  target_id        = "IP_ADDRESS_1"  # Replace with your actual IP address
-  port             = 443
-}
+resource "aws_s3_bucket_policy" "alb_log_policy" {
+  bucket = data.aws_s3_bucket.existing.id
 
-resource "aws_lb_target_group_attachment" "tg_attachment_2" {
-  target_group_arn = module.aws_lb_target_group_2.target_group_arn
-  target_id        = "IP_ADDRESS_2"  # Replace with your actual IP address
-  port             = 443
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "elasticloadbalancing.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::my-existing-s3-bucket/AWSLogs/your-account-id/*"
+    }
+  ]
+}
+POLICY
 }
